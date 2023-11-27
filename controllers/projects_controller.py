@@ -1,9 +1,8 @@
 from flask import jsonify, request, abort
+from services.llm import LLM
 
-# This could alternatively be a database or some other persistence mechanism
 projects = [
     {"id": 1, "name": "Project 1", "description": "A sample project"},
-    # ... other projects
 ]
 
 def show_projects():
@@ -14,7 +13,15 @@ def show_project(project_id):
     return jsonify(project) if project else abort(404)
 
 def create_project():
-    return projects[0], 201
+    if not request.json or 'description' not in request.json:
+      abort(400, description="Missing 'description' in request body")
+
+    # Extract the description from the request
+    description = request.json['description']
+    llm_service = LLM()
+
+    result = llm_service.call(description)
+    return result, 200
 
 def update_project(project_id):
     project = next((project for project in projects if project['id'] == project_id), None)
