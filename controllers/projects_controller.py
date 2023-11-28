@@ -1,5 +1,6 @@
 from flask import jsonify, request, abort
 from services.llm import LLM
+from celery_app import my_background_task
 
 projects = [
     {"id": 1, "name": "Project 1", "description": "A sample project"},
@@ -12,6 +13,8 @@ def show_project(project_id):
 def create_project():
     if not request.json or 'description' not in request.json:
       abort(400, description="Missing 'description' in request body")
+
+    my_background_task.delay(123, 345)
 
     description = request.json['description']
     llm_service = LLM()

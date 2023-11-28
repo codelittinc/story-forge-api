@@ -1,5 +1,7 @@
-from flask import Flask
-from controllers.projects_controller import show_project, create_project
+from flask import Flask, request, abort
+from services.llm import LLM
+
+from controllers.projects_controller import create_project, show_project
 from controllers.health_controller import index_health
 
 app = Flask(__name__)

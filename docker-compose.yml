@@ -16,13 +16,13 @@ services:
   redis:
     container_name: nlp-processor-redis
     image: "redis:alpine"
-    command: --port 6380
+    command: --port 6379
     expose:
-      - 6380
+      - 6379
     networks:
       - nlp-processor-network
     ports:
-      - '6380:6380'
+      - '6379:6379'
 
   app:
     build:
@@ -42,6 +42,26 @@ services:
       - redis
     ports:
       - "8080:8080"
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: story-forge-celery
+    tty: true
+    stdin_open: true
+    command: celery -A celery_app.celery worker --loglevel=info
+    networks:
+      - nlp-processor-network
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on: 
+      - db
+      - redis
+    ports:
+      - "8081:8081"
 
 networks:
   nlp-processor-network:
