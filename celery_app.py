@@ -21,4 +21,5 @@ def make_celery(app_name=__name__):
 
 celery = make_celery()
 
+# registering the tasks on Celery
 from tasks import my_background_task
