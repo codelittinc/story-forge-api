@@ -1,13 +1,13 @@
 from flask import Flask
-from controllers.projects_controller import show_projects, show_project, create_project, update_project, delete_project
+from controllers.projects_controller import show_project, create_project
+from controllers.health_controller import index_health
 
 app = Flask(__name__)
 
-app.add_url_rule('/projects', view_func=show_projects, methods=['GET'])
 app.add_url_rule('/projects/<int:project_id>', view_func=show_project, methods=['GET'])
 app.add_url_rule('/projects', view_func=create_project, methods=['POST'])
-app.add_url_rule('/projects/<int:project_id>', view_func=update_project, methods=['PUT'])
-app.add_url_rule('/projects/<int:project_id>', view_func=delete_project, methods=['DELETE'])
+
+app.add_url_rule('/health', view_func=index_health, methods=['GET'])
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)

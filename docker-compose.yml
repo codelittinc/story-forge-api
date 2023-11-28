@@ -1,0 +1,48 @@
+version: "2"
+services: 
+  db:
+    image: mongo:6.0
+    restart: always
+    volumes:
+      - ~/mongo:/data/db
+    container_name: nlp-processor-mongo
+    networks:
+      - nlp-processor-network
+    ports:
+      - "27017:27017"
+    env_file:
+      - .env
+  
+  redis:
+    container_name: nlp-processor-redis
+    image: "redis:alpine"
+    command: --port 6380
+    expose:
+      - 6380
+    networks:
+      - nlp-processor-network
+    ports:
+      - '6380:6380'
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: story-forge-api
+    tty: true
+    stdin_open: true
+    networks:
+      - nlp-processor-network
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on: 
+      - db
+      - redis
+    ports:
+      - "8080:8080"
+
+networks:
+  nlp-processor-network:
+    driver: bridge

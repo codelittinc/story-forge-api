@@ -1,0 +1,16 @@
+# Start from python:3.8-alpine base image
+FROM python:3.10-slim
+
+RUN pip3 install --upgrade pip
+
+# Make dir app
+RUN mkdir /app
+WORKDIR /app
+COPY requirements.txt requirements.txt
+
+# Install python libraries 
+RUN pip3 install -r requirements.txt
+
+COPY . .
+
+EXPOSE 8080
