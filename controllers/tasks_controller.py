@@ -1,16 +1,18 @@
 from flask import jsonify, request, abort
-from celery_app import my_background_task
+from celery_app import llm_execution_task
+from bson import ObjectId
 from app import mongo
 
-projects = [
-    {"id": 1, "name": "Project 1", "description": "A sample project"},
-]
+def show_task(task_id):
+    item = mongo.db.execution_queue.find_one({"_id": ObjectId(task_id)})
 
-def show_project(project_id):
-    project = next((project for project in projects if project['id'] == project_id), None)
-    return jsonify(project) if project else abort(404)
+    if item:
+        item['_id'] = str(item['_id'])
+        return jsonify(item)
+    else:
+        abort(404)
 
-def create_project():
+def create_task():
     if not request.json or 'description' not in request.json:
       abort(400, description="Missing 'description' in request body")
 
@@ -25,7 +27,7 @@ def create_project():
 
     item_id = str(item.inserted_id)
 
-    my_background_task.delay(item_id)
+    llm_execution_task.delay(item_id)
     
     return {
        "id": item_id 

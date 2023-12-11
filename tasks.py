@@ -1,22 +1,45 @@
 from celery_app import celery
+from flask import jsonify
 from bson import ObjectId
 import requests
-from app import mongo
+from app import mongo, app
 from services.llm import LLM
 
-@celery.task(name='my_background_task')
-def my_background_task(item_id):
-    item = mongo.db.execution_queue.find_one({"_id": ObjectId(item_id)})
-    llm_service = LLM()
+@celery.task(name='llm_execution_task')
+def llm_execution_task(item_id):
+    with app.app_context():
+      item = mongo.db.execution_queue.find_one({"_id": ObjectId(item_id)})
+      llm_service = LLM()
 
-    description = item['description']
-    webhook_url = item['webhook_url']
+      description = item['description']
+      result = llm_service.call(description)
+    
+      mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"result": result, "status": "LLM_COMPLETED"}})
 
-    result = llm_service.call(description)
+      webhook_task.delay(item_id)
 
-    response = requests.post(webhook_url, json={'description': result})
+@celery.task(name='webhook_task')
+def webhook_task(item_id):
+    with app.app_context():
+      item = mongo.db.execution_queue.find_one({"_id": ObjectId(item_id)})
 
-    if response.status_code != 200:
-        print(f'POST to {webhook_url} failed with status code {response.status_code}.')
-    else:
-        print(f'Successfully posted to {webhook_url}.')
+      webhook_url = item['webhook_url']
+
+      if item:
+          item['_id'] = str(item['_id'])
+          json_data = jsonify(item).get_json()
+
+      response = requests.post(webhook_url, json=json_data)
+
+      webhook_object = {
+          "status": response.status_code,
+          "response": response.text,
+          "webhook_url": webhook_url
+      }
+    
+      mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$push": {"webhook_requests": webhook_object}})
+
+      if response.status_code == 200:
+        mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"status": "PROCESSED"}})
+      else:
+        mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"status": "WEBHOOK_ERROR"}})

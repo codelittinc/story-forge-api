@@ -9,10 +9,10 @@ app.config["MONGO_URI"] = "mongodb://db:27017/storyforge"  # Update this URI to 
 mongo = PyMongo(app)
 
 if __name__ == '__main__':
-  from controllers.projects_controller import create_project, show_project
+  from controllers.tasks_controller import create_task, show_task
   from controllers.health_controller import index_health
-  app.add_url_rule('/projects/<int:project_id>', view_func=show_project, methods=['GET'])
-  app.add_url_rule('/projects', view_func=create_project, methods=['POST'])
+  app.add_url_rule('/tasks/<task_id>', view_func=show_task, methods=['GET'])
+  app.add_url_rule('/tasks', view_func=create_task, methods=['POST'])
   app.add_url_rule('/health', view_func=index_health, methods=['GET'])
 
 if __name__ == '__main__':
