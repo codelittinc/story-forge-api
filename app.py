@@ -2,14 +2,11 @@ from flask import Flask
 from services.llm import LLM
 from flask_pymongo import PyMongo
 
-
-
 app = Flask(__name__)
 
 app.config["MONGO_URI"] = "mongodb://db:27017/storyforge"  # Update this URI to point to your MongoDB instance
 
 mongo = PyMongo(app)
-
 
 if __name__ == '__main__':
   from controllers.projects_controller import create_project, show_project
