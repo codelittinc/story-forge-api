@@ -1,10 +1,14 @@
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 from flask import Flask
 from services.llm import LLM
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
 
-app.config["MONGO_URI"] = "mongodb://db:27017/storyforge"  # Update this URI to point to your MongoDB instance
+app.config["MONGO_URI"] = os.environ.get('MONGO_URI')  # Update this URI to point to your MongoDB instance
 
 mongo = PyMongo(app)
 
