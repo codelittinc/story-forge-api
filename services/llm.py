@@ -6,10 +6,10 @@ from langchain.llms import OpenAI
 load_dotenv()
 
 class LLM:
-    def __init__(self, task_prompt_template):
+    def __init__(self, prompt_template, prompt_variables):
         self.prompt_template = PromptTemplate(
-            input_variables=["task_description"],
-            template=task_prompt_template,
+            input_variables=prompt_variables,
+            template=prompt_template,
         )
         self.llm = OpenAI(openai_api_key=os.environ.get('OPENAI_API_KEY'), temperature=0.9)
 

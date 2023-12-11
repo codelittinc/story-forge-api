@@ -11,9 +11,10 @@ def llm_execution_task(item_id):
       item = mongo.db.execution_queue.find_one({"_id": ObjectId(item_id)})
 
       description = item['description']
-      prompt_template = item['prompt_template']
+      prompt_template = item['prompt']['template']
+      prompt_variables = item['prompt']['variables']
 
-      llm_service = LLM(prompt_template)
+      llm_service = LLM(prompt_template, prompt_variables)
 
       result = llm_service.call(description)
     
