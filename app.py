@@ -15,6 +15,7 @@ mongo = PyMongo(app)
 if __name__ == '__main__':
   from controllers.tasks_controller import create_task, show_task
   from controllers.health_controller import index_health
+
   app.add_url_rule('/tasks/<task_id>', view_func=show_task, methods=['GET'])
   app.add_url_rule('/tasks', view_func=create_task, methods=['POST'])
   app.add_url_rule('/health', view_func=index_health, methods=['GET'])

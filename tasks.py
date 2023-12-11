@@ -9,9 +9,12 @@ from services.llm import LLM
 def llm_execution_task(item_id):
     with app.app_context():
       item = mongo.db.execution_queue.find_one({"_id": ObjectId(item_id)})
-      llm_service = LLM()
 
       description = item['description']
+      prompt_template = item['prompt_template']
+
+      llm_service = LLM(prompt_template)
+
       result = llm_service.call(description)
     
       mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"result": result, "status": "LLM_COMPLETED"}})

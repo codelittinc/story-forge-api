@@ -19,9 +19,13 @@ def create_task():
     if not request.json or 'webhook_url' not in request.json:
       abort(400, description="Missing 'webhook_url' in request body")
 
+    if not request.json or 'prompt_template' not in request.json:
+      abort(400, description="Missing 'prompt_template' in request body")
+
     item = mongo.db.execution_queue.insert_one({
         "description": request.json['description'],
         "webhook_url": request.json['webhook_url'],
+        "prompt_template": request.json['prompt_template'],
         "status": "PENDING"
     })
 
