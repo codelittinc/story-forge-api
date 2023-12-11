@@ -1,7 +1,7 @@
-from flask import jsonify, request, abort
+from app import mongo
 from celery_app import llm_execution_task
 from bson import ObjectId
-from app import mongo
+from flask import jsonify, request, abort
 
 def show_task(task_id):
     item = mongo.db.execution_queue.find_one({"_id": ObjectId(task_id)})
@@ -30,5 +30,5 @@ def create_task():
     llm_execution_task.delay(item_id)
     
     return {
-       "id": item_id 
+       "task_id": item_id 
     }, 200

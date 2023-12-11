@@ -1,11 +1,11 @@
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
-
 from langchain.prompts import PromptTemplate
 from langchain.llms import OpenAI
 
+load_dotenv()
+
+# refactor this class to have the template being passed in as a parameter
 class LLM:
     def __init__(self):
         self.prompt_template = PromptTemplate(
