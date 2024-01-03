@@ -13,6 +13,6 @@ class LLM:
         )
         self.llm = OpenAI(openai_api_key=os.environ.get('OPENAI_API_KEY'), temperature=0.9)
 
-    def call(self, task_description):
-        prompt_text = self.prompt_template.format(task_description=task_description)
+    def call(self, task_description, context):
+        prompt_text = self.prompt_template.format(task_description=task_description, context=context)
         return self.llm(prompt_text)
