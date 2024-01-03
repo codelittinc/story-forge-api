@@ -13,7 +13,7 @@ ATLAS_VECTOR_SEARCH_INDEX_NAME = "testing-still"
 MONGO_URI = os.environ.get('MONGO_URI')
 
 class Embedder:
-    def create(self, content):
+    def create(self, content, context_id):
       
       client = MongoClient(MONGO_URI)
       
@@ -27,9 +27,10 @@ class Embedder:
           embedding=OpenAIEmbeddings(disallowed_special=()),
           collection=MONGODB_COLLECTION,
           index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
+          metadatas=[{"context_id": context_id}],
       )
 
-    def get(self, query):
+    def get(self, query, context_id):
       vector_search = MongoDBAtlasVectorSearch.from_connection_string(
           MONGO_URI,
           DB_NAME + "." + COLLECTION_NAME,
@@ -37,5 +38,12 @@ class Embedder:
           index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
       )
 
-      results = vector_search.similarity_search(query)
+      # Assuming the field in the documents that stores the context_id is named 'context_id'
+      search_filter = {"context_id": context_id}
+      
+      # Execute the search with the additional filter
+      search_type = "similarity"  # Replace with the appropriate search type for your use case
+
+      results = vector_search.search(query, pre_filter={"context_id": {"$eq": context_id}}, search_type="similarity")
+
       return results
