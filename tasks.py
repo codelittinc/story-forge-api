@@ -4,6 +4,7 @@ from bson import ObjectId
 import requests
 from app import mongo, app
 from services.llm import LLM
+from services.embedder import Embedder
 
 @celery.task(name='llm_execution_task')
 def llm_execution_task(item_id):
@@ -14,7 +15,16 @@ def llm_execution_task(item_id):
       prompt_template = item['prompt']['template']
       prompt_variables = item['prompt']['variables']
 
-      llm_service = LLM(prompt_template, prompt_variables)
+      results = Embedder().get(description)
+
+      prompt_template_with_context = "Given the context below, \n\n"
+      
+      for result in results:
+          prompt_template_with_context += result.page_content + "\n\n"
+      
+      prompt_template_with_context += "Answer to the following: " + prompt_template
+
+      llm_service = LLM(prompt_template_with_context, prompt_variables)
 
       result = llm_service.call(description)
     
