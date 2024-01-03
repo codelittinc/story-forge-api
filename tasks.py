@@ -18,16 +18,13 @@ def llm_execution_task(item_id):
 
       results = Embedder().get(description, context_id)
 
-      prompt_template_with_context = "Given the context below, \n\n"
-      
+      context = ""
       for result in results:
-          prompt_template_with_context += result.page_content + "\n\n"
+          context += result.page_content + "\n"
       
-      prompt_template_with_context += "Answer to the following: " + prompt_template
+      llm_service = LLM(prompt_template, prompt_variables)
 
-      llm_service = LLM(prompt_template_with_context, prompt_variables)
-
-      result = llm_service.call(description)
+      result = llm_service.call(description, context)
     
       mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"result": result, "status": "LLM_COMPLETED"}})
 
