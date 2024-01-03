@@ -14,8 +14,9 @@ def llm_execution_task(item_id):
       description = item['description']
       prompt_template = item['prompt']['template']
       prompt_variables = item['prompt']['variables']
+      context_id = item['context_id']
 
-      results = Embedder().get(description)
+      results = Embedder().get(description, context_id)
 
       prompt_template_with_context = "Given the context below, \n\n"
       
