@@ -25,15 +25,18 @@ def create_task():
     if not request.json or 'context_id' not in request.json:
       abort(400, description="Missing 'context_id' in request body")
 
+    if not request.json or 'session_id' not in request.json:
+      abort(400, description="Missing 'session' in request body")
+
     item = mongo.db.execution_queue.insert_one({
         "description": request.json['description'],
         "webhook_url": request.json['webhook_url'],
         "prompt": {
            "template": request.json['prompt']['template'],
-           "variables": request.json['prompt']['variables']
         },
         "status": "PENDING",
-        "context_id": request.json['context_id']
+        "context_id": request.json['context_id'],
+        "session_id": request.json['session_id'],
     })
 
     item_id = str(item.inserted_id)

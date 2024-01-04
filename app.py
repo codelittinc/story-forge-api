@@ -3,7 +3,6 @@ import os
 load_dotenv()
 
 from flask import Flask
-from services.llm import LLM
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
