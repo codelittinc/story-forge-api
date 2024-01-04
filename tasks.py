@@ -13,8 +13,8 @@ def llm_execution_task(item_id):
 
       description = item['description']
       prompt_template = item['prompt']['template']
-      prompt_variables = item['prompt']['variables']
       context_id = item['context_id']
+      session_id = item['session_id']
 
       results = Embedder().get(description, context_id)
 
@@ -22,9 +22,9 @@ def llm_execution_task(item_id):
       for result in results:
           context += result.page_content + "\n"
       
-      llm_service = LLM(prompt_template, prompt_variables)
+      llm_service = LLM(prompt_template)
 
-      result = llm_service.call(description, context)
+      result = llm_service.call(description, context, session_id)
     
       mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"result": result, "status": "LLM_COMPLETED"}})
 
