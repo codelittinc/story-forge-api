@@ -38,12 +38,6 @@ class Embedder:
           index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
       )
 
-      # Assuming the field in the documents that stores the context_id is named 'context_id'
-      search_filter = {"context_id": context_id}
-      
-      # Execute the search with the additional filter
-      search_type = "similarity"  # Replace with the appropriate search type for your use case
-
       results = vector_search.search(query, pre_filter={"context_id": {"$eq": context_id}}, search_type="similarity")
 
       return results
