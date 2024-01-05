@@ -5,6 +5,10 @@ import requests
 from app import mongo, app
 from services.llm import LLM
 from services.embedder import Embedder
+from services.box import Box
+from models.file import File
+from celery import shared_task
+from celery.exceptions import Retry
 
 @celery.task(name='llm_execution_task')
 def llm_execution_task(item_id):
@@ -55,3 +59,35 @@ def webhook_task(item_id):
         mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"status": "PROCESSED"}})
       else:
         mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"status": "WEBHOOK_ERROR"}})
+
+@shared_task(name='file_content_task', bind=True)
+def file_content_task(self, file_id):
+    file = File.find_by_id(file_id)
+    text_representation = Box().get_text_representation(file.box_id)
+
+    if text_representation is None:
+        try:
+            # Retry the task after 3 seconds
+            raise self.retry(countdown=3)
+        except Retry as exc:
+            raise exc  # Reraise the Retry exception to ensure the task is retried
+        except Exception as exc:
+            # Handle other exceptions that might occur
+            raise self.retry(exc=exc, countdown=3)
+
+    file.update({
+        "processing": {
+          "state": "in_progress",
+          "webhook_url": file.processing['webhook_url'],
+        }
+    })
+    
+    Embedder().create(text_representation, file.context_id, file_id)
+    file.update({
+        "processing": {
+          "state": "complete",
+          "webhook_url": file.processing['webhook_url'],
+        }
+    })
+
+    requests.post(file.processing['webhook_url'], json=file.to_json())
