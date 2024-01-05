@@ -13,8 +13,7 @@ ATLAS_VECTOR_SEARCH_INDEX_NAME = "testing-still"
 MONGO_URI = os.environ.get('MONGO_URI')
 
 class Embedder:
-    def create(self, content, context_id):
-      
+    def create(self, content, context_id, file_id):
       client = MongoClient(MONGO_URI)
       
       MONGODB_COLLECTION = client[DB_NAME][COLLECTION_NAME]
@@ -27,7 +26,7 @@ class Embedder:
           embedding=OpenAIEmbeddings(disallowed_special=()),
           collection=MONGODB_COLLECTION,
           index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
-          metadatas=[{"context_id": context_id}],
+          metadatas=[{"context_id": context_id, "file_id": file_id}],
       )
 
     def get(self, query, context_id):

@@ -17,4 +17,4 @@ def make_celery(app_name=__name__):
 celery = make_celery()
 
 # registering the tasks on Celery
-from tasks import llm_execution_task, webhook_task
+from tasks import llm_execution_task, webhook_task, file_content_task
