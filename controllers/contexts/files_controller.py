@@ -2,17 +2,19 @@ import os
 from flask import jsonify, request, abort
 from werkzeug.utils import secure_filename
 from services.box import Box
-from models.file import File
-from celery_app import file_content_task
-from app import mongo
+
+def get_file_model():
+    from models.file import File
+    return File
 
 def delete_file(file_id):
-    file = File.find_by_id(file_id)
+    from app import mongo
+    file = get_file_model().find_by_id(file_id)
 
     deleted = False
     if file:
       Box().delete(file.box_id)
-      delete_result = File.delete_by_id(file_id)
+      delete_result = get_file_model().delete_by_id(file_id)
       mongo.db.contents.delete_many({"file_id": file_id})
       deleted = delete_result.deleted_count > 0
 
@@ -22,6 +24,8 @@ def delete_file(file_id):
       return jsonify(), 404
 
 def create_file():
+    from celery_app import file_content_task
+
     if 'file' not in request.files:
         abort(400, description="No file part in the request")
 
@@ -51,7 +55,7 @@ def create_file():
         }
     }
 
-    file = File.create(file_data)
+    file = get_file_model().create(file_data)
 
     file_content_task(file._id)
 

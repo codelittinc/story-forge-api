@@ -1,14 +1,13 @@
-from boxsdk import OAuth2, Client
+from boxsdk import CCGAuth, Client
 import os
-from io import BytesIO
 import requests
 
 class Box:
     def __init__(self):
-      auth = OAuth2(
+      auth = CCGAuth(
           client_id=os.environ.get('BOX_CLIENT_ID'),
           client_secret=os.environ.get('BOX_CLIENT_SECRET'),
-          access_token=os.environ.get('BOX_ACCESS_TOKEN'),
+          enterprise_id=os.environ.get('BOX_ENTERPRISE_ID'),
       )
       self.client = Client(auth)
 
