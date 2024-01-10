@@ -4,13 +4,19 @@ from werkzeug.utils import secure_filename
 from services.box import Box
 from models.file import File
 from celery_app import file_content_task
+from app import mongo
 
 def delete_file(file_id):
     file = File.find_by_id(file_id)
-    Box().delete(file['box_id'])
-    delete_result = File.delete_by_id(file_id)
 
-    if delete_result.deleted_count > 0:
+    deleted = False
+    if file:
+      Box().delete(file.box_id)
+      delete_result = File.delete_by_id(file_id)
+      mongo.db.contents.delete_many({"file_id": file_id})
+      deleted = delete_result.deleted_count > 0
+
+    if deleted:
       return jsonify(), 204
     else:
       return jsonify(), 404
@@ -47,6 +53,6 @@ def create_file():
 
     file = File.create(file_data)
 
-    file_content_task.delay(file._id)
+    file_content_task(file._id)
 
     return file.to_json(), 200
