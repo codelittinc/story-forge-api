@@ -83,7 +83,7 @@ def file_content_task(self, file_id):
     })
     
     Embedder().create(text_representation, file.context_id, file_id)
-    file.update({
+    file = file.update({
         "processing": {
           "state": "complete",
           "webhook_url": file.processing['webhook_url'],

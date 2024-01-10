@@ -21,12 +21,14 @@ class Embedder:
       text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
       docs = text_splitter.split_text(content)
 
+      metadatas = [{"context_id": context_id, "file_id": file_id} for _ in docs]
+
       MongoDBAtlasVectorSearch.from_texts(
           texts=docs,
           embedding=OpenAIEmbeddings(disallowed_special=()),
           collection=MONGODB_COLLECTION,
           index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
-          metadatas=[{"context_id": context_id, "file_id": file_id}],
+          metadatas=metadatas,
       )
 
     def get(self, query, context_id):
