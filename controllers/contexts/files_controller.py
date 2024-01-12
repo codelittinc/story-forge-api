@@ -34,7 +34,7 @@ def delete_file(file_id):
     if file:
       Box().delete(file.box_id)
       delete_result = get_file_model().delete_by_id(file_id)
-      mongo.db.contents.delete_many({"file_id": file_id})
+      mongo.db.contents.delete_many({"source_id": file_id})
       deleted = delete_result.deleted_count > 0
 
     if deleted:
