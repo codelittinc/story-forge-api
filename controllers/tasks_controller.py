@@ -1,7 +1,58 @@
 from bson import ObjectId
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, Blueprint
+tasks_blueprint = Blueprint('files', __name__)
 
+@tasks_blueprint.route('/tasks/<task_id>', methods=['GET'])
 def show_task(task_id):
+    """
+    Retrieves the details of a specific task based on the task ID provided.
+    ---
+    tags:
+      - Tasks
+    parameters:
+      - in: path
+        name: task_id
+        required: true
+        type: string
+        description: The unique identifier of the task.
+    responses:
+      200:
+        description: Details of the task.
+        schema:
+          type: object
+          properties:
+            _id:
+              type: string
+              description: The unique identifier of the task.
+            task_description:
+              type: string
+              description: The description of the task.
+            prompt:
+              type: object
+              description: The prompt template for the task.
+              properties:
+                template:
+                  type: string
+                  description: The template string of the prompt.
+            processing:
+              type: object
+              description: Processing details of the task.
+              properties:
+                status:
+                  type: string
+                  description: The current status of the task.
+                callback_url:
+                  type: string
+                  description: The callback URL to be triggered upon task completion.
+            context_id:
+              type: string
+              description: The context ID associated with the task.
+            session_id:
+              type: integer
+              description: The session ID associated with the task.
+      404:
+        description: Task not found.
+    """
     from app import mongo
     item = mongo.db.execution_queue.find_one({"_id": ObjectId(task_id)})
 
@@ -11,7 +62,59 @@ def show_task(task_id):
     else:
         abort(404)
 
+@tasks_blueprint.route('/tasks', methods=['POST'])
 def create_task():
+    """
+    Creates a task for execution and processing. It accepts a task description, callback URL, prompt, context ID, and session ID. Upon completion, it triggers a callback to the specified URL.
+    ---
+    tags:
+      - Tasks
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - task_description
+            - callback_url
+            - prompt
+            - context_id
+            - session_id
+          properties:
+            task_description:
+              type: string
+              description: The description of the task.
+            webhook_url:
+              type: string
+              description: The URL to which the callback will be made upon task completion.
+            prompt:
+              type: object
+              description: The prompt template for the task.
+              properties:
+                template:
+                  type: string
+                  description: The template string of the prompt. Example > Previous conversation {chat_history} Given the context {context} answer the question below {task_description}. Answer like Yoda
+            context_id:
+              type: string
+              description: A unique identifier for the context of the task.
+            session_id:
+              type: integer
+              description: A unique identifier for the session.
+    responses:
+      200:
+        description: Successfully created the task.
+        schema:
+          type: object
+          properties:
+            task_id:
+              type: string
+              description: The ID of the created task.
+      400:
+        description: Invalid request due to missing required fields.
+    """
+
+
     from celery_app import llm_execution_task
     from app import mongo
     if not request.json or 'task_description' not in request.json:

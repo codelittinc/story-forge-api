@@ -2,10 +2,27 @@
 import os
 from flask import Flask
 from flask_pymongo import PyMongo
+from flasgger import Swagger
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = os.environ.get('MONGO_URI')  # Make sure this points to your MongoDB
 app.debug = True
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": 'apispec_1',
+            "route": '/apispec_1.json',
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/docs"
+}
+
+swagger = Swagger(app, config=swagger_config)
 
 mongo = PyMongo(app)
 

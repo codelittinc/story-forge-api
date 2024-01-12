@@ -55,7 +55,10 @@ def webhook_task(item_id):
 
       if item:
           item['id'] = str(item['_id'])
-          del item['_id']
+          del item['box_id']
+          del item['stored_filename']
+          item['filename'] = item['original_filename']
+          del item['original_filename']
           json_data = jsonify(item).get_json()
 
       response = requests.post(webhook_url, json=json_data)
@@ -68,10 +71,11 @@ def webhook_task(item_id):
     
       mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$push": {"webhook_requests": webhook_object}})
 
-      if response.status_code == 200:
-        mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"status": "PROCESSED"}})
-      else:
-        mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"status": "WEBHOOK_ERROR"}})
+# @TODO: update how we save about the webhook processing
+#      if response.status_code == 200:
+#        mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"status": "PROCESSED"}})
+#      else:
+#        mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"status": "WEBHOOK_ERROR"}})
 
 @shared_task(name='file_content_task', bind=True)
 def file_content_task(self, file_id):
@@ -102,5 +106,8 @@ def file_content_task(self, file_id):
           "webhook_url": file.processing['webhook_url'],
         }
     })
+
+    json = file.to_json()
+    del json['box_id']
 
     requests.post(file.processing['webhook_url'], json=file.to_json())
