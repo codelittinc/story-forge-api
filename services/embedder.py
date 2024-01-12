@@ -13,7 +13,7 @@ ATLAS_VECTOR_SEARCH_INDEX_NAME = "testing-still"
 MONGO_URI = os.environ.get('MONGO_URI')
 
 class Embedder:
-    def create(self, content, context_id, file_id):
+    def create(self, content, context_id, source_id):
       client = MongoClient(MONGO_URI)
       
       MONGODB_COLLECTION = client[DB_NAME][COLLECTION_NAME]
@@ -21,7 +21,7 @@ class Embedder:
       text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
       docs = text_splitter.split_text(content)
 
-      metadatas = [{"context_id": context_id, "file_id": file_id} for _ in docs]
+      metadatas = [{"context_id": context_id, "source_id": source_id} for _ in docs]
 
       MongoDBAtlasVectorSearch.from_texts(
           texts=docs,
