@@ -15,12 +15,12 @@ def llm_execution_task(item_id):
     with app.app_context():
       item = mongo.db.execution_queue.find_one({"_id": ObjectId(item_id)})
 
-      description = item['description']
+      task_description = item['task_description']
       prompt_template = item['prompt']['template']
       context_id = item['context_id']
       session_id = item['session_id']
 
-      results = Embedder().get(description, context_id)
+      results = Embedder().get(task_description, context_id)
 
       context = ""
       for result in results:
@@ -28,9 +28,21 @@ def llm_execution_task(item_id):
       
       llm_service = LLM(prompt_template)
 
-      result = llm_service.call(description, context, session_id)
+      result = llm_service.call(task_description, context, session_id)
+      answer = result['answer'] 
+      prompt = result['prompt']
     
-      mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {"result": result, "status": "LLM_COMPLETED"}})
+      mongo.db.execution_queue.update_one({"_id": ObjectId(item_id)}, {"$set": {
+         "response": answer,
+         "processing": {
+              "status": "complete",
+              "webhook_url": item['processing']['webhook_url']
+         },
+         "prompt": {
+            "template": prompt_template,
+            "parsed": prompt
+         }
+       }})
 
       webhook_task.delay(item_id)
 
@@ -39,10 +51,11 @@ def webhook_task(item_id):
     with app.app_context():
       item = mongo.db.execution_queue.find_one({"_id": ObjectId(item_id)})
 
-      webhook_url = item['webhook_url']
+      webhook_url = item['processing']['webhook_url']
 
       if item:
-          item['_id'] = str(item['_id'])
+          item['id'] = str(item['_id'])
+          del item['_id']
           json_data = jsonify(item).get_json()
 
       response = requests.post(webhook_url, json=json_data)

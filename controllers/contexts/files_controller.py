@@ -58,5 +58,9 @@ def create_file():
     file = get_file_model().create(file_data)
 
     file_content_task(file._id)
-
-    return file.to_json(), 200
+    response = file.to_json()
+    del response['box_id']
+    del response['stored_filename']
+    response['filename'] = response['original_filename']
+    del response['original_filename']
+    return response, 200

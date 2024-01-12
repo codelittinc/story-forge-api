@@ -24,7 +24,11 @@ class LLM:
         )
 
         answer = conversation.predict(task_description=task_description, chat_history=history.messages, context=context)
+        prompt_description = prompt.format(task_description=task_description, chat_history=history.messages, context=context)
         history.add_user_message(task_description)
         history.add_ai_message(answer)
 
-        return answer
+        return {
+            "answer": answer.strip(),
+            "prompt": prompt_description
+        }

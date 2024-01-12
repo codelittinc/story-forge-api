@@ -20,8 +20,8 @@ class Model:
         jsonable_data = {}
         for attribute, value in self.__dict__.items():
             # If the value is an ObjectId, convert it to string
-            if isinstance(value, ObjectId):
-                jsonable_data[attribute] = str(value)
+            if attribute == '_id':
+                jsonable_data['id'] = str(value)
             else:
                 jsonable_data[attribute] = value
         return jsonable_data
