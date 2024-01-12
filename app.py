@@ -11,15 +11,15 @@ swagger_config = {
     "headers": [],
     "specs": [
         {
-            "endpoint": 'apispec_1',
-            "route": '/apispec_1.json',
+            "endpoint": 'apispecs',
+            "route": '/apispecs.json',
             "rule_filter": lambda rule: True,
             "model_filter": lambda tag: True,
         }
     ],
     "static_url_path": "/flasgger_static",
     "swagger_ui": True,
-    "specs_route": "/docs"
+    "specs_route": "/"
 }
 
 swagger = Swagger(app, config=swagger_config)
@@ -37,7 +37,6 @@ app.add_url_rule('/tasks', view_func=create_task, methods=['POST'])
 app.add_url_rule('/contexts/files', view_func=create_file, methods=['POST'])
 app.add_url_rule('/contents/files/<file_id>', view_func=delete_file, methods=['DELETE'])
 app.add_url_rule('/health', view_func=index_health, methods=['GET'])
-app.add_url_rule('/', view_func=index_health, methods=['GET'])
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=os.environ.get('PORT', 5000), debug=True)
