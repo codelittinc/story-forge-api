@@ -103,7 +103,7 @@ def create_file():
             "public_url": "https://codelitt.box.com/shared/static/sdfdsfdsfsdfdsfds.txt"
           }
     """
-    from celery_app import file_content_task
+    from celery_app import extract_file_content 
 
     if 'file' not in request.files:
         abort(400, description="No file part in the request")
@@ -136,7 +136,7 @@ def create_file():
 
     file = get_file_model().create(file_data)
 
-    file_content_task(file._id)
+    extract_file_content(file._id)
     response = file.to_json()
     del response['box_id']
     del response['stored_filename']
