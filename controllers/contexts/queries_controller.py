@@ -72,7 +72,7 @@ def create_query():
         description: Invalid request due to missing required fields or unsupported database type.
     """
 
-    from celery_app import query_content_task
+    from celery_app import extract_query_content
     required_fields = ['database_type', 'connection_string', 'query', 'context_id']
     for field in required_fields:
         if not request.json or field not in request.json:
@@ -96,7 +96,7 @@ def create_query():
             'webhook_url': data.get('webhook_url')
         }
     })
-    query_content_task.delay(record._id)
+    extract_query_content.delay(record._id)
     
     return jsonify(record.to_json())
 

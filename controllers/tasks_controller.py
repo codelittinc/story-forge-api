@@ -115,7 +115,7 @@ def create_task():
     """
 
 
-    from celery_app import llm_execution_task
+    from celery_app import execute_llm
     from app import mongo
     if not request.json or 'task_description' not in request.json:
       abort(400, description="Missing 'task_description' in request body")
@@ -147,7 +147,7 @@ def create_task():
 
     item_id = str(item.inserted_id)
 
-    llm_execution_task.delay(item_id)
+    execute_llm.delay(item_id)
     
     return {
        "task_id": item_id 
