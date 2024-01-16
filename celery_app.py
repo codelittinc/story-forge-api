@@ -19,5 +19,6 @@ celery = make_celery()
 # registering the tasks on Celery
 from tasks.webhooks import send_webhook
 from tasks.execute_llm import execute_llm
-from tasks.queries import extract_query_content
+from tasks.postgresql_query import extract_postgresql_query_content
 from tasks.files import extract_file_content
+from tasks.mongodb_query import extract_mongodb_query_content

@@ -5,8 +5,8 @@ from models.query import Query
 from celery import shared_task
 import psycopg2
 
-@shared_task(name='extract_query_content', bind=True)
-def extract_query_content(self, query_id):
+@shared_task(name='extract_postgresql_query_content', bind=True)
+def extract_postgresql_query_content(self, query_id):
     with app.app_context():
       query = Query.find_by_id(query_id)
 

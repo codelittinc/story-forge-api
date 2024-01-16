@@ -30,15 +30,21 @@ mongo = PyMongo(app)
 from controllers.contexts.files_controller import create_file, delete_file 
 from controllers.tasks_controller import create_task, show_task
 from controllers.health_controller import index_health
-from controllers.contexts.queries_controller import create_query, delete_query
+from controllers.contexts.queries.postgresql_controller import create_query, delete_query
+from controllers.contexts.queries.mongodb_controller import create_mongodb_query
 
 # URL route definitions
 app.add_url_rule('/tasks/<task_id>', view_func=show_task, methods=['GET'])
 app.add_url_rule('/tasks', view_func=create_task, methods=['POST'])
 app.add_url_rule('/contexts/files', view_func=create_file, methods=['POST'])
 app.add_url_rule('/contents/files/<file_id>', view_func=delete_file, methods=['DELETE'])
-app.add_url_rule('/contents/queries', view_func=create_query, methods=['POST'])
-app.add_url_rule('/contents/queries/<query_id>', view_func=delete_query, methods=['DELETE'])
+
+app.add_url_rule('/contents/queries/postgresql', view_func=create_query, methods=['POST'])
+app.add_url_rule('/contents/queries/postgresql/<query_id>', view_func=delete_query, methods=['DELETE'])
+
+app.add_url_rule('/contents/queries/mongodb', view_func=create_mongodb_query, methods=['POST'])
+app.add_url_rule('/contents/queries/mongodb/<query_id>', view_func=delete_query, methods=['DELETE'])
+
 app.add_url_rule('/health', view_func=index_health, methods=['GET'])
 
 if __name__ == '__main__':
