@@ -1,12 +1,12 @@
 from flask import jsonify, request, abort, Blueprint
 
-queries_blueprint = Blueprint('queries', __name__)
+queries_blueprint = Blueprint('queries/Postgresql', __name__)
 
 def get_query_model():
     from models.query import Query
     return Query
 
-@queries_blueprint.route('/contexts/queries', methods=['POST'])
+@queries_blueprint.route('/contexts/queries/postgresql', methods=['POST'])
 def create_query():
     """
     Creates a new query and schedules it for processing against a PostgreSQL database. Upon completion, a callback is triggered to the specified URL.
@@ -72,7 +72,7 @@ def create_query():
         description: Invalid request due to missing required fields or unsupported database type.
     """
 
-    from celery_app import extract_query_content
+    from celery_app import extract_postgresql_query_content
     required_fields = ['database_type', 'connection_string', 'query', 'context_id']
     for field in required_fields:
         if not request.json or field not in request.json:
@@ -96,21 +96,39 @@ def create_query():
             'webhook_url': data.get('webhook_url')
         }
     })
-    extract_query_content.delay(record._id)
+    extract_postgresql_query_content.delay(record._id)
     
     return jsonify(record.to_json())
 
 
 # Define your endpoint for deleting queries
-@queries_blueprint.route('/contexts/queries', methods=['DELETE'])
+@queries_blueprint.route('/contexts/queries/postgresql', methods=['DELETE'])
 def delete_query(query_id):
+    """
+    Deletes a query based on the specified query ID. This endpoint removes the query from the database and any associated records.
+    ---
+    tags:
+      - Queries
+    parameters:
+      - in: path
+        name: query_id
+        required: true
+        type: string
+        description: The unique identifier of the query to delete.
+    responses:
+      204:
+        description: The query was successfully deleted.
+      404:
+        description: The query with the specified ID was not found or could not be deleted.
+    """
+
     from app import mongo
     query = get_query_model().find_by_id(query_id)
 
     deleted = False
     if query:
       delete_result = get_query_model().delete_by_id(query_id)
-      mongo.db.contents.delete_many({"query_id": query_id})
+      mongo.db.contents.delete_many({"source_id": query_id})
       deleted = delete_result.deleted_count > 0
 
     if deleted:
