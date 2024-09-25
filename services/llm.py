@@ -12,8 +12,8 @@ class LLM:
         # Set the model to 'gpt-4'
         self.llm = ChatOpenAI(
             openai_api_key=os.environ.get('OPENAI_API_KEY'),
-            model='gpt-4o',  # Explicitly set the model to GPT-4
-            temperature=0.9
+            model=os.environ.get('OPEN_AI_MODEL'),  # Explicitly set the model to GPT-4
+            temperature=os.environ.get('OPEN_AI_MODEL_TEMPERATURE')
         )
         self.prompt_text = prompt_template
 
