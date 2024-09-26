@@ -1,12 +1,13 @@
-# In app.py
 import os
 from flask import Flask
 from flask_pymongo import PyMongo
 from flasgger import Swagger
+from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = os.environ.get('MONGO_URI')  # Make sure this points to your MongoDB
 app.debug = True
+
 swagger_config = {
     "headers": [],
     "specs": [
@@ -25,6 +26,9 @@ swagger_config = {
 swagger = Swagger(app, config=swagger_config)
 
 mongo = PyMongo(app)
+
+# Enable CORS for all routes and origins
+CORS(app)
 
 # Import controllers after initializing Flask app and mongo
 from controllers.contexts.files_controller import create_file, delete_file 
