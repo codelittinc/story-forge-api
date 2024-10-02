@@ -143,3 +143,48 @@ def create_file():
     response['filename'] = response['original_filename']
     del response['original_filename']
     return response, 200
+
+@files_blueprint.route('/contexts/files', methods=['GET'])
+def list_files():
+    """
+    Lists files by context ID.
+    ---
+    tags:
+      - Files
+    parameters:
+      - in: query
+        name: context_id
+        type: string
+        required: true
+        description: The context ID to filter files.
+    responses:
+      200:
+        description: A list of files matching the given context.
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              box_id:
+                type: string
+              context_id:
+                type: string
+              file_extension:
+                type: string
+              id:
+                type: string
+              origial_filename:
+                type: string
+              public_url:
+                type: string
+              stored_filename:
+                type: string
+    """
+    context_id = request.args.get('context_id')
+    if not context_id:
+        abort(400, description="Missing 'context_id' parameter in request")
+
+    files = get_file_model().find({"context_id": context_id})
+
+    response = [file.to_json() for file in files]
+    return jsonify(response), 200

@@ -31,7 +31,7 @@ mongo = PyMongo(app)
 CORS(app)
 
 # Import controllers after initializing Flask app and mongo
-from controllers.contexts.files_controller import create_file, delete_file 
+from controllers.contexts.files_controller import create_file, delete_file, list_files
 from controllers.tasks_controller import create_task, show_task
 from controllers.health_controller import index_health
 from controllers.contexts.queries.postgresql_controller import create_query, delete_query
@@ -40,8 +40,10 @@ from controllers.contexts.queries.mongodb_controller import create_mongodb_query
 # URL route definitions
 app.add_url_rule('/tasks/<task_id>', view_func=show_task, methods=['GET'])
 app.add_url_rule('/tasks', view_func=create_task, methods=['POST'])
+
 app.add_url_rule('/contexts/files', view_func=create_file, methods=['POST'])
 app.add_url_rule('/contents/files/<file_id>', view_func=delete_file, methods=['DELETE'])
+app.add_url_rule('/contents/files', view_func=list_files, methods=['GET'])
 
 app.add_url_rule('/contents/queries/postgresql', view_func=create_query, methods=['POST'])
 app.add_url_rule('/contents/queries/postgresql/<query_id>', view_func=delete_query, methods=['DELETE'])

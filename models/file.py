@@ -22,6 +22,12 @@ class File(Model):
         inserted_file = mongo.db.files.find_one({'_id': inserted_id})
         return cls(cls.convert_to_jsonable(inserted_file))
 
+    @classmethod
+    def find(cls, query):
+        documents = mongo.db.files.find(query)
+        result = [cls(cls.convert_to_jsonable(document)) for document in documents]
+        return result
+
     def update(self, update_data):
         mongo.db.files.update_one({'_id': ObjectId(self._id)}, {'$set': update_data})
         return File.find_by_id(self._id)
