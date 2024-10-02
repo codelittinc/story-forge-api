@@ -33,7 +33,8 @@ def extract_file_content(self, file_id):
         "processing": {
           "state": "complete",
           "webhook_url": file.processing['webhook_url'],
-        }
+        },
+        "text_representation": text_representation
     })
 
     json = file.to_json()
