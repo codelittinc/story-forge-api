@@ -13,8 +13,8 @@ def make_celery(app_name=__name__):
     )
     celery.conf.update(app.config)
 
-    # Configure SSL for the broker and backend if using rediss://
-    ssl_options = {'ssl_cert_reqs': ssl.CERT_REQUIRED}
+    # Configure SSL to disable certificate verification (for development only!)
+    ssl_options = {'ssl_cert_reqs': ssl.CERT_NONE}
     celery.conf.broker_use_ssl = ssl_options
     celery.conf.redis_backend_use_ssl = ssl_options
 
